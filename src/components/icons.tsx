@@ -13,6 +13,6 @@ export const Logo = (props: SVGProps<SVGSVGElement>) => (
   >
     <path d="M12 2a10 10 0 1 0 10 10" />
     <path d="M12 8a4 4 0 1 0 4 4" />
-    <path d="M12 12h8" />
+    <path d="m12.5 12.5 4.5 4.5" />
   </svg>
 );

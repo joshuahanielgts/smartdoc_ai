@@ -11,7 +11,7 @@ const fontSans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'DriveSafe AI',
+  title: 'LucidDrive AI',
   description: 'AI-powered driver fatigue monitoring and assistance.',
 };
 

@@ -1,20 +1,36 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Bell, Play, Square } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Button } from '@/components/ui/button';
 
-export function DashboardHeader() {
+type DashboardHeaderProps = {
+  isMonitoring: boolean;
+  onStart: () => void;
+  onStop: () => void;
+};
+
+export function DashboardHeader({ isMonitoring, onStart, onStop }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/20 bg-transparent px-4 backdrop-blur-lg md:px-8">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/10 bg-transparent px-4 backdrop-blur-sm md:px-8">
       <div className="flex items-center gap-3">
         <Logo className="h-8 w-8 text-primary" />
-        <h1 className="text-xl font-bold tracking-tight text-foreground">DriveSafe AI</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">LucidDrive AI</h1>
       </div>
       <div className="flex items-center gap-4">
+        {!isMonitoring ? (
+          <Button size="sm" onClick={onStart} className="bg-primary/80 hover:bg-primary text-primary-foreground">
+            <Play className="mr-2 h-4 w-4" /> Start Monitoring
+          </Button>
+        ) : (
+          <Button size="sm" onClick={onStop} variant="destructive">
+            <Square className="mr-2 h-4 w-4" /> Stop Monitoring
+          </Button>
+        )}
+         <Button variant="ghost" size="icon">
+            <Bell className="h-5 w-5" />
+            <span className="sr-only">Notifications</span>
+        </Button>
         <ThemeToggle />
-        <Avatar>
-          <AvatarImage src="https://picsum.photos/100/100" alt="User" data-ai-hint="person face" />
-          <AvatarFallback>U</AvatarFallback>
-        </Avatar>
       </div>
     </header>
   );

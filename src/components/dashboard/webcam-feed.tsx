@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Video, VideoOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 type WebcamFeedProps = {
   isMonitoring: boolean;
@@ -14,9 +13,7 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const { toast } = useToast();
-  const toastId = useRef<string | null>(null);
-
+  
   useEffect(() => {
     const getCameraPermission = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -55,25 +52,11 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
     };
   }, [isMonitoring]);
 
-  useEffect(() => {
-    if (hasCameraPermission === false) {
-      if (!toastId.current) {
-        const { id } = toast({
-          variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings to use this feature.',
-          duration: 5000,
-        });
-        toastId.current = id;
-      }
-    }
-  }, [hasCameraPermission, toast]);
-
   return (
-    <Card className="h-full bg-card/10 backdrop-blur-lg border-white/20">
+    <Card className="h-full bg-secondary/50 border-white/10">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-base font-medium text-foreground">Live Feed</CardTitle>
-        {isMonitoring ? <Video className="h-5 w-5 text-muted-foreground" /> : <VideoOff className="h-5 w-5 text-muted-foreground" /> }
+        {isMonitoring ? <Video className="h-5 w-5 text-primary" /> : <VideoOff className="h-5 w-5 text-muted-foreground" /> }
       </CardHeader>
       <CardContent className="relative aspect-video">
         <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted/50" autoPlay muted playsInline />
@@ -82,6 +65,7 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
              <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <VideoOff className="h-10 w-10" />
                 <p>Camera is off</p>
+                 <p className="text-xs">Click "Start Monitoring" to begin.</p>
             </div>
           </div>
         )}

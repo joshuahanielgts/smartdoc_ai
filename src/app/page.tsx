@@ -9,8 +9,6 @@ import { AlertLog } from '@/components/dashboard/alert-log';
 import { DriHistoryChart } from '@/components/dashboard/dri-history-chart';
 import { SafetyTips } from '@/components/dashboard/safety-tips';
 import { SessionSummary } from '@/components/dashboard/session-summary';
-import { Button } from '@/components/ui/button';
-import { Play, Square } from 'lucide-react';
 
 export default function DashboardPage() {
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -30,23 +28,15 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <DashboardHeader />
+    <div className="flex flex-col min-h-screen bg-transparent text-foreground">
+      <DashboardHeader 
+        isMonitoring={isMonitoring}
+        onStart={handleStart}
+        onStop={handleStop}
+      />
       <main className="flex-1 p-4 md:p-6 lg:p-8">
-        <div className="flex justify-center mb-6">
-          {!isMonitoring ? (
-            <Button size="lg" onClick={handleStart} className="bg-primary/80 hover:bg-primary text-primary-foreground">
-              <Play className="mr-2 h-5 w-5" /> Start Monitoring
-            </Button>
-          ) : (
-            <Button size="lg" onClick={handleStop} variant="destructive">
-              <Square className="mr-2 h-5 w-5" /> Stop Monitoring
-            </Button>
-          )}
-        </div>
-
         {showSummary && !isMonitoring ? (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto mt-8">
              <SessionSummary history={history} alerts={alerts} autoGenerate={true} />
           </div>
         ) : (

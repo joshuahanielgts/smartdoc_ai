@@ -19,7 +19,7 @@ export function DriMeter({ dri }: DriMeterProps) {
   const riskLevel = getRiskLevel(dri);
 
   return (
-    <Card className="flex flex-col h-full bg-card/10 backdrop-blur-lg border-white/20">
+    <Card className="flex flex-col h-full bg-secondary/50 border-white/10">
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-foreground">Driver Risk Index</CardTitle>
         <CardDescription className="text-muted-foreground">{riskLevel}</CardDescription>

@@ -12,7 +12,7 @@ type AlertLogProps = {
 
 export function AlertLog({ alerts }: AlertLogProps) {
   return (
-    <Card className="bg-card/10 backdrop-blur-lg border-white/20">
+    <Card className="bg-secondary/50 border-white/10">
       <CardHeader>
         <CardTitle className="text-foreground">Alert Log</CardTitle>
         <CardDescription className="text-muted-foreground">Recent drowsiness and fatigue alerts.</CardDescription>

@@ -14,7 +14,7 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
   const chartConfig = {
     dri: {
       label: 'DRI',
-      color: 'hsl(var(--chart-1))',
+      color: 'hsl(var(--primary))',
     },
   };
   
@@ -24,7 +24,7 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
   }));
 
   return (
-    <Card className="bg-card/10 backdrop-blur-lg border-white/20">
+    <Card className="bg-secondary/50 border-white/10">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
           <CardTitle className="text-foreground">DRI History</CardTitle>
