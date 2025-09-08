@@ -69,9 +69,8 @@ export function useDriverMonitoring(isMonitoring: boolean) {
         // When "eyes are closed", jump DRI to the 75-95 range
         newDri = 75 + Math.random() * 20;
       } else {
-        // If not drowsy, DRI gradually falls.
-        const decrease = prevDri > 30 ? Math.random() * 15 : Math.random() * 5;
-        newDri = prevDri - decrease;
+        // When "eyes are open", DRI should be low. Let's drop it to the 5-25 range.
+        newDri = 5 + Math.random() * 20;
       }
       
       // Clamp DRI between 0 and 100
