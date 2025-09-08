@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { getVoiceWarning } from '@/lib/actions';
 import type { DriHistoryPoint, Alert } from '@/lib/types';
 
@@ -16,7 +15,6 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const lastAlertTimestamp = useRef<number>(0);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
-  const { toast } = useToast();
 
   const speak = (text: string) => {
     if ('speechSynthesis' in window && text) {
@@ -38,12 +36,6 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     const alertId = `alert-${now}`;
 
     setAlerts((prev) => [{ id: alertId, time: now, message: `High drowsiness detected.`, dri: currentDri }, ...prev]);
-
-    toast({
-      variant: 'destructive',
-      title: 'Drowsiness Alert!',
-      description: `Your DRI is ${currentDri}. Please consider pulling over.`,
-    });
 
     try {
       const warning = await getVoiceWarning(currentDri);
@@ -81,7 +73,7 @@ export function useDriverMonitoring(isMonitoring: boolean) {
         
         return finalDri;
     });
-  }, [toast]);
+  }, []);
 
   const startMonitoring = useCallback(() => {
     if (intervalIdRef.current) return;
