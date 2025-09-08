@@ -5,15 +5,15 @@ import { getVoiceWarning } from '@/lib/actions';
 import type { DriHistoryPoint, Alert } from '@/lib/types';
 
 const DRI_THRESHOLD = 70;
-const SIMULATION_INTERVAL = 1500; // 1.5 seconds
-const ALERT_COOLDOWN = 30000; // 30 seconds
+const SIMULATION_INTERVAL = 2000; // 2 seconds
+const ALERT_COOLDOWN = 15000; // 15 seconds
 const MAX_HISTORY = 50;
 
 // State to simulate drowsiness behavior
 const simState = {
   isDrowsy: false,
   drowsinessChance: 0.1,
-  wakeUpChance: 0.2,
+  wakeUpChance: 0.3,
 };
 
 export function useDriverMonitoring(isMonitoring: boolean) {
@@ -25,6 +25,8 @@ export function useDriverMonitoring(isMonitoring: boolean) {
 
   const speak = (text: string) => {
     if ('speechSynthesis' in window && text) {
+      // Cancel any previous speech to avoid overlapping warnings
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 0.9;
@@ -40,37 +42,36 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     lastAlertTimestamp.current = now;
 
     const alertId = `alert-${now}`;
-    setAlerts((prev) => [{ id: alertId, time: now, message: `High drowsiness detected.`, dri: currentDri }, ...prev]);
+    // Use "Fatigue detected" as requested
+    setAlerts((prev) => [{ id: alertId, time: now, message: `Fatigue detected`, dri: currentDri }, ...prev]);
     
     try {
       const warning = await getVoiceWarning(currentDri);
       speak(warning);
     } catch (error) {
       console.error('Failed to get voice warning:', error);
-      speak('High risk detected. Please be careful.');
+      speak('High risk detected. Please take a break now.');
     }
   };
 
   const runSimulation = useCallback(() => {
+    // Decide if the driver is getting drowsy or waking up
+    if (!simState.isDrowsy && Math.random() < simState.drowsinessChance) {
+      simState.isDrowsy = true;
+    } else if (simState.isDrowsy && Math.random() < simState.wakeUpChance) {
+      simState.isDrowsy = false;
+    }
+
     setDri(prevDri => {
-      let newDri = prevDri;
-
-      // Decide if the driver is getting drowsy or waking up
-      if (!simState.isDrowsy && Math.random() < simState.drowsinessChance) {
-        simState.isDrowsy = true;
-      } else if (simState.isDrowsy && Math.random() < simState.wakeUpChance) {
-        simState.isDrowsy = false;
-      }
-
-      // Adjust DRI based on drowsiness state
+      let newDri;
+      
       if (simState.isDrowsy) {
-        // If drowsy, DRI climbs. This simulates eyes closing more.
-        const increase = Math.random() * 15;
-        newDri += increase;
+        // When "eyes are closed", jump DRI to the 75-95 range
+        newDri = 75 + Math.random() * 20;
       } else {
-        // If not drowsy, DRI falls. This simulates eyes are open and alert.
-        const decrease = Math.random() * 10;
-        newDri -= decrease;
+        // If not drowsy, DRI gradually falls.
+        const decrease = prevDri > 30 ? Math.random() * 15 : Math.random() * 5;
+        newDri = prevDri - decrease;
       }
       
       // Clamp DRI between 0 and 100
@@ -99,6 +100,7 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     setHistory([{ time: Date.now(), dri: 0 }]);
     setAlerts([]);
     setDri(0);
+    lastAlertTimestamp.current = 0;
     intervalIdRef.current = setInterval(runSimulation, SIMULATION_INTERVAL);
   }, [runSimulation]);
 
@@ -107,13 +109,21 @@ export function useDriverMonitoring(isMonitoring: boolean) {
       clearInterval(intervalIdRef.current);
       intervalIdRef.current = null;
     }
+    // ensure speech is cancelled when monitoring stops
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
   }, []);
 
   useEffect(() => {
-    if (!isMonitoring) {
+    if (isMonitoring) {
+        startMonitoring();
+    } else {
       stopMonitoring();
     }
-  }, [isMonitoring, stopMonitoring]);
+    // Cleanup on unmount
+    return stopMonitoring;
+  }, [isMonitoring, startMonitoring, stopMonitoring]);
 
   return { dri, history, alerts, startMonitoring, stopMonitoring };
 }
