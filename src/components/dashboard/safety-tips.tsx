@@ -28,7 +28,7 @@ export function SafetyTips({ history, alerts }: SafetyTipsProps) {
   };
 
   return (
-    <Card className="bg-secondary/50 border-white/10">
+    <Card className="glass-card">
       <CardHeader>
         <CardTitle className="text-foreground">Personalized Safety Tips</CardTitle>
         <CardDescription className="text-muted-foreground">AI-generated advice based on your driving data.</CardDescription>

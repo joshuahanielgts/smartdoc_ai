@@ -55,7 +55,7 @@ export function SessionSummary({ history, alerts, autoGenerate = false }: Sessio
 
 
   return (
-    <Card className="bg-secondary/50 border-white/10">
+    <Card className="glass-card">
       <CardHeader>
         <CardTitle className="text-foreground">Session Summary</CardTitle>
         <CardDescription className="text-muted-foreground">An AI-powered summary of your driving session.</CardDescription>

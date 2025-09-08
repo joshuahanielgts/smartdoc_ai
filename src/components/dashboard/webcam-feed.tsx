@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Video, VideoOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 type WebcamFeedProps = {
   isMonitoring: boolean;
@@ -13,6 +14,7 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const { toast } = useToast();
   
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -52,8 +54,18 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
     };
   }, [isMonitoring]);
 
+  useEffect(() => {
+    if (hasCameraPermission === false) {
+      toast({
+        variant: 'destructive',
+        title: 'Camera Access Denied',
+        description: 'Please enable camera permissions in your browser settings.',
+      });
+    }
+  }, [hasCameraPermission, toast]);
+
   return (
-    <Card className="h-full bg-secondary/50 border-white/10">
+    <Card className="h-full glass-card">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-base font-medium text-foreground">Live Feed</CardTitle>
         {isMonitoring ? <Video className="h-5 w-5 text-primary" /> : <VideoOff className="h-5 w-5 text-muted-foreground" /> }

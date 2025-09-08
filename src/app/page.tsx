@@ -43,8 +43,10 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
             <div className="lg:col-span-2 xl:col-span-3 flex flex-col gap-6">
               <DriHistoryChart history={history} />
-              <AlertLog alerts={alerts} />
-              <SafetyTips history={history} alerts={alerts} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AlertLog alerts={alerts} />
+                <SafetyTips history={history} alerts={alerts} />
+              </div>
             </div>
             <div className="lg:col-span-1 xl:col-span-1 flex flex-col gap-6">
               <WebcamFeed isMonitoring={isMonitoring} />

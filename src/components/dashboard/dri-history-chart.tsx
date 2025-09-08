@@ -24,7 +24,7 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
   }));
 
   return (
-    <Card className="bg-secondary/50 border-white/10">
+    <Card className="glass-card">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
           <CardTitle className="text-foreground">DRI History</CardTitle>

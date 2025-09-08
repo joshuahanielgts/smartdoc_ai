@@ -75,3 +75,9 @@ body {
     background: linear-gradient(to bottom right, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
   }
 }
+
+@layer components {
+  .glass-card {
+    @apply bg-secondary/30 backdrop-blur-sm border border-white/10 rounded-xl;
+  }
+}

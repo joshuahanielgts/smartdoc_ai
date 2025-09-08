@@ -11,8 +11,12 @@ const fontSans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'LucidDrive AI',
-  description: 'AI-powered driver fatigue monitoring and assistance.',
+  title: 'LucidDrive AI - Drive Safe, Arrive Safe',
+  description: 'LucidDrive AI is an advanced driver assistance system that uses your webcam to monitor fatigue levels in real-time, providing AI-powered alerts and safety tips to prevent accidents.',
+  keywords: ['driver safety', 'fatigue detection', 'AI assistant', 'road safety', 'anti-sleep alarm', 'driver monitoring'],
+  authors: [{ name: 'LucidDrive AI Team' }],
+  creator: 'LucidDrive AI',
+  publisher: 'LucidDrive AI',
 };
 
 export default function RootLayout({
