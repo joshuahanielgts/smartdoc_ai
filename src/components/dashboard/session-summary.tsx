@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,10 @@ import { getSafetyTips } from '@/lib/actions';
 type SessionSummaryProps = {
   history: DriHistoryPoint[];
   alerts: Alert[];
+  autoGenerate?: boolean;
 };
 
-export function SessionSummary({ history, alerts }: SessionSummaryProps) {
+export function SessionSummary({ history, alerts, autoGenerate = false }: SessionSummaryProps) {
   const [summary, setSummary] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,10 +24,14 @@ export function SessionSummary({ history, alerts }: SessionSummaryProps) {
     setSummary('');
 
     const driValues = history.map((p) => p.dri);
+    if (driValues.length === 0) {
+        setSummary("No driving data was recorded for this session.");
+        setIsLoading(false);
+        return;
+    }
     const maxDRI = Math.max(...driValues, 0);
     const averageDRI = driValues.length > 0 ? Math.round(driValues.reduce((a, b) => a + b, 0) / driValues.length) : 0;
     
-    // For the demo, we'll re-generate tips for the summary
     const tipsText = await getSafetyTips(driValues.join(','), alerts.length);
     const safetyTips = tipsText.split('\n').map(t => t.replace(/^- /, ''));
 
@@ -42,11 +47,18 @@ export function SessionSummary({ history, alerts }: SessionSummaryProps) {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+    if (autoGenerate) {
+      handleGenerateSummary();
+    }
+  }, [autoGenerate]);
+
+
   return (
     <Card className="bg-card/10 backdrop-blur-lg border-white/20">
       <CardHeader>
-        <CardTitle className="text-foreground">Daily Session Summary</CardTitle>
-        <CardDescription className="text-muted-foreground">Generate an AI-powered summary of your driving session.</CardDescription>
+        <CardTitle className="text-foreground">Session Summary</CardTitle>
+        <CardDescription className="text-muted-foreground">An AI-powered summary of your driving session.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading && (
@@ -58,21 +70,23 @@ export function SessionSummary({ history, alerts }: SessionSummaryProps) {
           </div>
         )}
         {summary && !isLoading && (
-          <div className="text-sm text-foreground space-y-2">
-            <p className="flex items-start gap-2">
-              <BookText className="h-4 w-4 mt-1 shrink-0 text-primary" />
+          <div className="text-sm text-foreground/90 space-y-2 prose prose-invert prose-p:my-1">
+            <p className="flex items-start gap-3">
+              <BookText className="h-4 w-5 mt-1 shrink-0 text-primary" />
               <span>{summary}</span>
             </p>
           </div>
         )}
         {!summary && !isLoading && (
            <div className="text-sm text-muted-foreground text-center py-4">
-            Click the button to generate a session summary.
+             { autoGenerate ? 'Generating summary...' : 'Click the button to generate a session summary.'}
           </div>
         )}
-        <Button onClick={handleGenerateSummary} disabled={isLoading} variant="secondary" className="bg-primary/80 hover:bg-primary text-primary-foreground">
-          {isLoading ? 'Generating...' : 'Generate Daily Summary'}
-        </Button>
+        {!autoGenerate && (
+            <Button onClick={handleGenerateSummary} disabled={isLoading} variant="secondary" className="bg-primary/80 hover:bg-primary text-primary-foreground">
+                {isLoading ? 'Generating...' : 'Generate Summary'}
+            </Button>
+        )}
       </CardContent>
     </Card>
   );
