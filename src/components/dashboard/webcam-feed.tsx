@@ -8,18 +8,14 @@ import { useToast } from '@/hooks/use-toast';
 
 export function WebcamFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [hasCameraPermission, setHasCameraPermission] = useState(true);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const { toast } = useToast();
+  const toastId = useRef<string | null>(null);
 
   useEffect(() => {
     const getCameraPermission = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Not Supported',
-          description: 'Your browser does not support camera access.',
-        });
         return;
       }
 
@@ -32,16 +28,24 @@ export function WebcamFeed() {
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings to use this feature.',
-        });
       }
     };
 
     getCameraPermission();
-  }, [toast]);
+  }, []);
+
+  useEffect(() => {
+    if (hasCameraPermission === false) {
+      if (!toastId.current) {
+        const { id } = toast({
+          variant: 'destructive',
+          title: 'Camera Access Denied',
+          description: 'Please enable camera permissions in your browser settings to use this feature.',
+        });
+        toastId.current = id;
+      }
+    }
+  }, [hasCameraPermission, toast]);
 
   return (
     <Card className="h-full bg-card/10 backdrop-blur-lg border-white/20">
@@ -51,7 +55,7 @@ export function WebcamFeed() {
       </CardHeader>
       <CardContent className="relative aspect-video">
         <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
-        {!hasCameraPermission && (
+        {hasCameraPermission === false && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
             <Alert variant="destructive" className="w-auto">
               <AlertTitle>Camera Access Required</AlertTitle>
