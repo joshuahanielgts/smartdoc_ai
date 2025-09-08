@@ -6,20 +6,13 @@ import { getVoiceWarning } from '@/lib/actions';
 import type { DriHistoryPoint, Alert } from '@/lib/types';
 
 const DRI_THRESHOLD = 70;
-const SIMULATION_INTERVAL = 3000; // 3 seconds
+const SIMULATION_INTERVAL = 2000; // 2 seconds
 const ALERT_COOLDOWN = 30000; // 30 seconds
 const MAX_HISTORY = 50;
 
-// Simplified levels
-const LOW_RISK = 25;
-const MODERATE_RISK = 50;
-const HIGH_RISK = 80;
-
-const riskLevels = [LOW_RISK, MODERATE_RISK, HIGH_RISK];
-
 export function useDriverMonitoring() {
-  const [dri, setDri] = useState(LOW_RISK);
-  const [history, setHistory] = useState<DriHistoryPoint[]>([{ time: Date.now(), dri: LOW_RISK }]);
+  const [dri, setDri] = useState(0);
+  const [history, setHistory] = useState<DriHistoryPoint[]>([{ time: Date.now(), dri: 0 }]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const lastAlertTimestamp = useRef<number>(0);
   const { toast } = useToast();
@@ -62,22 +55,34 @@ export function useDriverMonitoring() {
     };
 
     const intervalId = setInterval(() => {
-      // jump between levels
-      const newDri = riskLevels[Math.floor(Math.random() * riskLevels.length)];
-        
-      setDri(newDri);
+        setDri(prevDri => {
+            let change = (Math.random() - 0.45) * 15; // Fluctuate between roughly -6.75 and +8.25
+            let newDri = prevDri + change;
+    
+            // Clamp the value between 0 and 100
+            newDri = Math.max(0, Math.min(100, newDri));
 
-      setHistory((prevHistory) => {
-        const newHistory = [...prevHistory, { time: Date.now(), dri: newDri }];
-        if (newHistory.length > MAX_HISTORY) {
-          return newHistory.slice(newHistory.length - MAX_HISTORY);
-        }
-        return newHistory;
-      });
+            // Add a chance for a more significant jump
+            if (Math.random() < 0.1) {
+                newDri = Math.random() * 90;
+            }
+            
+            const finalDri = Math.round(newDri);
 
-      if (newDri > DRI_THRESHOLD) {
-        handleHighDri(newDri);
-      }
+            setHistory((prevHistory) => {
+                const newHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
+                if (newHistory.length > MAX_HISTORY) {
+                    return newHistory.slice(newHistory.length - MAX_HISTORY);
+                }
+                return newHistory;
+            });
+
+            if (finalDri > DRI_THRESHOLD) {
+                handleHighDri(finalDri);
+            }
+            
+            return finalDri;
+        });
 
     }, SIMULATION_INTERVAL);
 
