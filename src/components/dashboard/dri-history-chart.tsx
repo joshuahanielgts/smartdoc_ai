@@ -24,11 +24,11 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
   }));
 
   return (
-    <Card>
+    <Card className="bg-card/10 backdrop-blur-lg border-white/20">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle>DRI History</CardTitle>
-          <CardDescription>Driver Risk Index over the current session</CardDescription>
+          <CardTitle className="text-foreground">DRI History</CardTitle>
+          <CardDescription className="text-muted-foreground">Driver Risk Index over the current session</CardDescription>
         </div>
         <Activity className="h-5 w-5 text-muted-foreground" />
       </CardHeader>
@@ -43,19 +43,21 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
               top: 10,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsla(var(--border), 0.5)" />
             <XAxis
               dataKey="time"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) => value.slice(0, 5)}
+              stroke="hsl(var(--foreground))"
             />
             <YAxis
               domain={[0, 100]}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
+              stroke="hsl(var(--foreground))"
             />
             <ChartTooltip
               cursor={false}
@@ -65,6 +67,7 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
                   labelFormatter={(label, payload) => {
                     return payload[0]?.payload.time || label;
                   }}
+                  className="bg-background/80 backdrop-blur-sm"
                 />
               }
             />

@@ -10,9 +10,16 @@ const SIMULATION_INTERVAL = 3000; // 3 seconds
 const ALERT_COOLDOWN = 30000; // 30 seconds
 const MAX_HISTORY = 50;
 
+// Simplified levels
+const LOW_RISK = 25;
+const MODERATE_RISK = 50;
+const HIGH_RISK = 80;
+
+const riskLevels = [LOW_RISK, MODERATE_RISK, HIGH_RISK];
+
 export function useDriverMonitoring() {
-  const [dri, setDri] = useState(25);
-  const [history, setHistory] = useState<DriHistoryPoint[]>([{ time: Date.now(), dri: 25 }]);
+  const [dri, setDri] = useState(LOW_RISK);
+  const [history, setHistory] = useState<DriHistoryPoint[]>([{ time: Date.now(), dri: LOW_RISK }]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const lastAlertTimestamp = useRef<number>(0);
   const { toast } = useToast();
@@ -55,27 +62,23 @@ export function useDriverMonitoring() {
     };
 
     const intervalId = setInterval(() => {
-      setDri((prevDri) => {
-        let change = (Math.random() - 0.4) * 10;
-        if (prevDri > 60) {
-            change = (Math.random() - 0.3) * 15; // More likely to increase
-        }
-        const newDri = Math.min(100, Math.max(0, Math.round(prevDri + change)));
+      // jump between levels
+      const newDri = riskLevels[Math.floor(Math.random() * riskLevels.length)];
         
-        setHistory((prevHistory) => {
-          const newHistory = [...prevHistory, { time: Date.now(), dri: newDri }];
-          if (newHistory.length > MAX_HISTORY) {
-            return newHistory.slice(newHistory.length - MAX_HISTORY);
-          }
-          return newHistory;
-        });
+      setDri(newDri);
 
-        if (newDri > DRI_THRESHOLD) {
-          handleHighDri(newDri);
+      setHistory((prevHistory) => {
+        const newHistory = [...prevHistory, { time: Date.now(), dri: newDri }];
+        if (newHistory.length > MAX_HISTORY) {
+          return newHistory.slice(newHistory.length - MAX_HISTORY);
         }
-
-        return newDri;
+        return newHistory;
       });
+
+      if (newDri > DRI_THRESHOLD) {
+        handleHighDri(newDri);
+      }
+
     }, SIMULATION_INTERVAL);
 
     return () => clearInterval(intervalId);

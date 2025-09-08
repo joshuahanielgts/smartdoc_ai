@@ -28,17 +28,17 @@ export function SafetyTips({ history, alerts }: SafetyTipsProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-card/10 backdrop-blur-lg border-white/20">
       <CardHeader>
-        <CardTitle>Personalized Safety Tips</CardTitle>
-        <CardDescription>AI-generated advice based on your driving data.</CardDescription>
+        <CardTitle className="text-foreground">Personalized Safety Tips</CardTitle>
+        <CardDescription className="text-muted-foreground">AI-generated advice based on your driving data.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading && (
           <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-4/5" />
-            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full bg-muted/50" />
+            <Skeleton className="h-4 w-4/5 bg-muted/50" />
+            <Skeleton className="h-4 w-full bg-muted/50" />
           </div>
         )}
         {tips && !isLoading && (
@@ -56,7 +56,7 @@ export function SafetyTips({ history, alerts }: SafetyTipsProps) {
             Click the button to generate personalized tips.
           </div>
         )}
-        <Button onClick={handleGenerateTips} disabled={isLoading}>
+        <Button onClick={handleGenerateTips} disabled={isLoading} variant="secondary" className="bg-primary/80 hover:bg-primary text-primary-foreground">
           {isLoading ? 'Generating...' : 'Generate Tips'}
         </Button>
       </CardContent>

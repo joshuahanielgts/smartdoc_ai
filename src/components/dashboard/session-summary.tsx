@@ -43,18 +43,18 @@ export function SessionSummary({ history, alerts }: SessionSummaryProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-card/10 backdrop-blur-lg border-white/20">
       <CardHeader>
-        <CardTitle>Daily Session Summary</CardTitle>
-        <CardDescription>Generate an AI-powered summary of your driving session.</CardDescription>
+        <CardTitle className="text-foreground">Daily Session Summary</CardTitle>
+        <CardDescription className="text-muted-foreground">Generate an AI-powered summary of your driving session.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading && (
           <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-4/5" />
-            <Skeleton className="h-4 w-full" />
-             <Skeleton className="h-4 w-3/5" />
+            <Skeleton className="h-4 w-full bg-muted/50" />
+            <Skeleton className="h-4 w-4/5 bg-muted/50" />
+            <Skeleton className="h-4 w-full bg-muted/50" />
+            <Skeleton className="h-4 w-3/5 bg-muted/50" />
           </div>
         )}
         {summary && !isLoading && (
@@ -70,7 +70,7 @@ export function SessionSummary({ history, alerts }: SessionSummaryProps) {
             Click the button to generate a session summary.
           </div>
         )}
-        <Button onClick={handleGenerateSummary} disabled={isLoading}>
+        <Button onClick={handleGenerateSummary} disabled={isLoading} variant="secondary" className="bg-primary/80 hover:bg-primary text-primary-foreground">
           {isLoading ? 'Generating...' : 'Generate Daily Summary'}
         </Button>
       </CardContent>

@@ -19,10 +19,10 @@ export function DriMeter({ dri }: DriMeterProps) {
   const riskLevel = getRiskLevel(dri);
 
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full bg-card/10 backdrop-blur-lg border-white/20">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Driver Risk Index</CardTitle>
-        <CardDescription>{riskLevel}</CardDescription>
+        <CardTitle className="text-foreground">Driver Risk Index</CardTitle>
+        <CardDescription className="text-muted-foreground">{riskLevel}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer config={{}} className="mx-auto aspect-square max-h-[250px]">
@@ -38,7 +38,7 @@ export function DriMeter({ dri }: DriMeterProps) {
             <RadialBar
               dataKey="value"
               cornerRadius={10}
-              background={{ fill: 'hsl(var(--muted))' }}
+              background={{ fill: 'hsla(var(--muted), 0.5)' }}
             />
             <text
               x="50%"
@@ -53,7 +53,7 @@ export function DriMeter({ dri }: DriMeterProps) {
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm pt-4">
-        <div className="flex items-center gap-2 font-medium leading-none">
+        <div className="flex items-center gap-2 font-medium leading-none text-foreground/80">
           <TrendingUp className="h-4 w-4" /> Monitoring Actively
         </div>
         <div className="leading-none text-muted-foreground">Real-time fatigue analysis</div>

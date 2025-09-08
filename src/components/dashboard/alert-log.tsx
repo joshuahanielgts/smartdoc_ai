@@ -12,10 +12,10 @@ type AlertLogProps = {
 
 export function AlertLog({ alerts }: AlertLogProps) {
   return (
-    <Card>
+    <Card className="bg-card/10 backdrop-blur-lg border-white/20">
       <CardHeader>
-        <CardTitle>Alert Log</CardTitle>
-        <CardDescription>Recent drowsiness and fatigue alerts.</CardDescription>
+        <CardTitle className="text-foreground">Alert Log</CardTitle>
+        <CardDescription className="text-muted-foreground">Recent drowsiness and fatigue alerts.</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-64">
@@ -32,7 +32,7 @@ export function AlertLog({ alerts }: AlertLogProps) {
                     <ShieldAlert className="h-5 w-5 text-destructive" />
                   </div>
                   <div className="grid gap-1">
-                    <p className="font-medium">{alert.message}</p>
+                    <p className="font-medium text-foreground/90">{alert.message}</p>
                     <p className="text-sm text-muted-foreground">
                       {formatDistanceToNow(new Date(alert.time), { addSuffix: true })} at DRI {alert.dri}
                     </p>
