@@ -5,9 +5,16 @@ import { getVoiceWarning } from '@/lib/actions';
 import type { DriHistoryPoint, Alert } from '@/lib/types';
 
 const DRI_THRESHOLD = 70;
-const SIMULATION_INTERVAL = 2000; // 2 seconds
+const SIMULATION_INTERVAL = 1500; // 1.5 seconds
 const ALERT_COOLDOWN = 30000; // 30 seconds
 const MAX_HISTORY = 50;
+
+// State to simulate drowsiness behavior
+const simState = {
+  isDrowsy: false,
+  drowsinessChance: 0.1,
+  wakeUpChance: 0.2,
+};
 
 export function useDriverMonitoring(isMonitoring: boolean) {
   const [dri, setDri] = useState(0);
@@ -32,11 +39,9 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     }
     lastAlertTimestamp.current = now;
 
-    const message = `High drowsiness detected! DRI: ${currentDri}. Please take a break.`;
     const alertId = `alert-${now}`;
-
     setAlerts((prev) => [{ id: alertId, time: now, message: `High drowsiness detected.`, dri: currentDri }, ...prev]);
-
+    
     try {
       const warning = await getVoiceWarning(currentDri);
       speak(warning);
@@ -48,35 +53,49 @@ export function useDriverMonitoring(isMonitoring: boolean) {
 
   const runSimulation = useCallback(() => {
     setDri(prevDri => {
-        let change = (Math.random() - 0.45) * 15;
-        let newDri = prevDri + change;
+      let newDri = prevDri;
 
-        newDri = Math.max(0, Math.min(100, newDri));
+      // Decide if the driver is getting drowsy or waking up
+      if (!simState.isDrowsy && Math.random() < simState.drowsinessChance) {
+        simState.isDrowsy = true;
+      } else if (simState.isDrowsy && Math.random() < simState.wakeUpChance) {
+        simState.isDrowsy = false;
+      }
 
-        if (Math.random() < 0.1) {
-            newDri = Math.random() * 90;
-        }
-        
-        const finalDri = Math.round(newDri);
+      // Adjust DRI based on drowsiness state
+      if (simState.isDrowsy) {
+        // If drowsy, DRI climbs. This simulates eyes closing more.
+        const increase = Math.random() * 15;
+        newDri += increase;
+      } else {
+        // If not drowsy, DRI falls. This simulates eyes are open and alert.
+        const decrease = Math.random() * 10;
+        newDri -= decrease;
+      }
+      
+      // Clamp DRI between 0 and 100
+      newDri = Math.max(0, Math.min(100, newDri));
+      const finalDri = Math.round(newDri);
 
-        setHistory((prevHistory) => {
-            const newHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
-            if (newHistory.length > MAX_HISTORY) {
-                return newHistory.slice(newHistory.length - MAX_HISTORY);
-            }
-            return newHistory;
-        });
+      setHistory((prevHistory) => {
+          const newHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
+          if (newHistory.length > MAX_HISTORY) {
+              return newHistory.slice(newHistory.length - MAX_HISTORY);
+          }
+          return newHistory;
+      });
 
-        if (finalDri > DRI_THRESHOLD) {
-            handleHighDri(finalDri);
-        }
-        
-        return finalDri;
+      if (finalDri > DRI_THRESHOLD) {
+          handleHighDri(finalDri);
+      }
+      
+      return finalDri;
     });
   }, []);
 
   const startMonitoring = useCallback(() => {
     if (intervalIdRef.current) return;
+    simState.isDrowsy = false; // Reset simulation state
     setHistory([{ time: Date.now(), dri: 0 }]);
     setAlerts([]);
     setDri(0);
