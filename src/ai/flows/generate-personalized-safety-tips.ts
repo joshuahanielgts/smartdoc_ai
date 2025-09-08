@@ -44,14 +44,16 @@ const prompt = ai.definePrompt({
   name: 'generatePersonalizedSafetyTipsPrompt',
   input: {schema: GeneratePersonalizedSafetyTipsInputSchema},
   output: {schema: GeneratePersonalizedSafetyTipsOutputSchema},
-  prompt: `You are an AI assistant that generates personalized safety tips for drivers based on their driving data.
+  prompt: `You are an AI assistant for a driver safety app. Your goal is to provide clear, concise, and actionable safety tips.
 
-  Analyze the following driving data to provide specific and actionable advice to the driver.
+  Analyze the following driving data:
+  - DRI History (a sequence of risk scores): {{{driHistory}}}
+  - Alert Frequency (how many times a high-risk alert was triggered): {{{alertFrequency}}}
 
-  DRI History: {{{driHistory}}}
-  Alert Frequency: {{{alertFrequency}}}
-
-  Based on this data, generate 3-5 personalized safety tips to help the driver improve their driving habits and reduce fatigue. Make the tips specific to the data provided.  If the DRI is high, suggest taking more breaks. If alert frequency is high, suggest getting more sleep before driving.  Be direct and to the point.
+  Based on this data, generate 2-3 short, direct safety tips.
+  - If the DRI was consistently high or spiked frequently, strongly recommend taking a break.
+  - If the alert frequency is high, suggest getting more rest before driving.
+  - Keep the tips focused on reducing fatigue. Be encouraging but firm.
   `,
 });
 

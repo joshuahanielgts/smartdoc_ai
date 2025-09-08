@@ -42,20 +42,22 @@ const generateDailySessionSummaryPrompt = ai.definePrompt({
   name: 'generateDailySessionSummaryPrompt',
   input: {schema: GenerateDailySessionSummaryInputSchema},
   output: {schema: GenerateDailySessionSummaryOutputSchema},
-  prompt: `You are an AI assistant that generates daily summaries of driving sessions.
+  prompt: `You are an AI assistant generating a summary of a driving session.
 
-  Based on the driver's performance data for the day, including the maximum DRI, average DRI, alert frequency, and any specific safety tips, create a concise and informative summary.
+  Based on the driver's performance data, create a concise, one-paragraph summary.
+  
+  - Start by mentioning the key stats like average and max DRI.
+  - Incorporate the provided safety tips naturally into the summary.
+  - The tone should be helpful and encouraging.
 
-  The summary should highlight key statistics, potential areas for improvement, and personalized safety advice.
+  Data:
+  - Date: {{{date}}}
+  - Maximum DRI: {{{maxDRI}}}
+  - Average DRI: {{{averageDRI}}}
+  - Alert Frequency: {{{alertFrequency}}}
+  - Key Safety Advice: {{#each safetyTips}} - {{{this}}}{{/each}}
 
-  Driver ID: {{{driverId}}}
-  Date: {{{date}}}
-  Maximum DRI: {{{maxDRI}}}
-  Average DRI: {{{averageDRI}}}
-  Alert Frequency: {{{alertFrequency}}}
-  Safety Tips: {{#each safetyTips}} - {{{this}}}{{/each}}
-
-  Summary:`,
+  Generate the summary paragraph now.`,
 });
 
 const generateDailySessionSummaryFlow = ai.defineFlow(
