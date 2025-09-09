@@ -12,7 +12,7 @@ import { SessionSummary } from '@/components/dashboard/session-summary';
 
 export default function DashboardPage() {
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const { dri, history, alerts, startMonitoring, stopMonitoring } = useDriverMonitoring(isMonitoring);
+  const { dri, history, alerts, startMonitoring, stopMonitoring, getAlertContext } = useDriverMonitoring(isMonitoring);
   const [showSummary, setShowSummary] = useState(false);
 
   const handleStart = () => {
@@ -33,6 +33,8 @@ export default function DashboardPage() {
         isMonitoring={isMonitoring}
         onStart={handleStart}
         onStop={handleStop}
+        alerts={alerts}
+        getAlertContext={getAlertContext}
       />
       <main className="flex-1 p-4 md:p-6 lg:p-8">
         {showSummary && !isMonitoring ? (

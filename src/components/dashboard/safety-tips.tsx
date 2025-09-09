@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Lightbulb } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Lightbulb, Volume2, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getSafetyTips } from '@/lib/actions';
+import { getSafetyTips, getSpeech } from '@/lib/actions';
 import type { Alert, DriHistoryPoint } from '@/lib/types';
 
 type SafetyTipsProps = {
@@ -16,6 +16,22 @@ type SafetyTipsProps = {
 export function SafetyTips({ history, alerts }: SafetyTipsProps) {
   const [tips, setTips] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playAudio = (audioDataUri: string) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    const audio = new Audio(audioDataUri);
+    audioRef.current = audio;
+    audio.play();
+    setIsSpeaking(true);
+    audio.onended = () => {
+      setIsSpeaking(false);
+      audioRef.current = null;
+    };
+  };
 
   const handleGenerateTips = async () => {
     setIsLoading(true);
@@ -25,6 +41,15 @@ export function SafetyTips({ history, alerts }: SafetyTipsProps) {
     const generatedTips = await getSafetyTips(driHistory, alertFrequency);
     setTips(generatedTips);
     setIsLoading(false);
+
+    if (generatedTips) {
+      try {
+        const audioData = await getSpeech(generatedTips);
+        playAudio(audioData);
+      } catch (error) {
+        console.error("Failed to generate or play speech for tips:", error);
+      }
+    }
   };
 
   return (
@@ -56,9 +81,19 @@ export function SafetyTips({ history, alerts }: SafetyTipsProps) {
             Click the button to generate personalized tips.
           </div>
         )}
-        <Button onClick={handleGenerateTips} disabled={isLoading} variant="secondary" className="bg-primary/80 hover:bg-primary text-primary-foreground">
-          {isLoading ? 'Generating...' : 'Generate Tips'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleGenerateTips} disabled={isLoading || isSpeaking} variant="secondary" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              'Generate Tips'
+            )}
+          </Button>
+          {isSpeaking && <Volume2 className="h-5 w-5 text-primary animate-pulse" />}
+        </div>
       </CardContent>
     </Card>
   );

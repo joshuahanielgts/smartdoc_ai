@@ -1,15 +1,19 @@
-import { Bell, Play, Square } from 'lucide-react';
+import { Play, Square } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
+import { NotificationCenter } from '@/components/dashboard/notification-center';
+import type { Alert, AlertContext } from '@/lib/types';
 
 type DashboardHeaderProps = {
   isMonitoring: boolean;
   onStart: () => void;
   onStop: () => void;
+  alerts: Alert[];
+  getAlertContext: (alertId: string) => AlertContext | undefined;
 };
 
-export function DashboardHeader({ isMonitoring, onStart, onStop }: DashboardHeaderProps) {
+export function DashboardHeader({ isMonitoring, onStart, onStop, alerts, getAlertContext }: DashboardHeaderProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/10 bg-transparent px-4 backdrop-blur-sm md:px-8">
       <div className="flex items-center gap-3">
@@ -18,7 +22,7 @@ export function DashboardHeader({ isMonitoring, onStart, onStop }: DashboardHead
       </div>
       <div className="flex items-center gap-4">
         {!isMonitoring ? (
-          <Button size="sm" onClick={onStart} className="bg-primary/80 hover:bg-primary text-primary-foreground">
+          <Button size="sm" onClick={onStart} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Play className="mr-2 h-4 w-4" /> Start Monitoring
           </Button>
         ) : (
@@ -26,10 +30,7 @@ export function DashboardHeader({ isMonitoring, onStart, onStop }: DashboardHead
             <Square className="mr-2 h-4 w-4" /> Stop Monitoring
           </Button>
         )}
-         <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-            <span className="sr-only">Notifications</span>
-        </Button>
+        <NotificationCenter alerts={alerts} getAlertContext={getAlertContext} />
         <ThemeToggle />
       </div>
     </header>

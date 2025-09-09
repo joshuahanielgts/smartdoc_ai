@@ -3,6 +3,7 @@
 import { provideVoiceAssistantWarnings } from '@/ai/flows/provide-voice-assistant-warnings';
 import { generatePersonalizedSafetyTips } from '@/ai/flows/generate-personalized-safety-tips';
 import { generateDailySessionSummary, type GenerateDailySessionSummaryInput } from '@/ai/flows/generate-daily-session-summaries';
+import { generateSpeech } from '@/ai/flows/generate-speech';
 
 export async function getVoiceWarning(dri: number) {
   try {
@@ -32,4 +33,15 @@ export async function getDailySummary(input: GenerateDailySessionSummaryInput) {
         console.error('Error getting daily summary:', error);
         return 'Could not generate summary. Please try again later.';
     }
+}
+
+export async function getSpeech(text: string) {
+  try {
+    const result = await generateSpeech({ text });
+    return result.audio;
+  } catch (error)
+  {
+    console.error('Error getting speech:', error);
+    throw new Error('Could not generate speech.');
+  }
 }

@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getVoiceWarning } from '@/lib/actions';
-import type { DriHistoryPoint, Alert } from '@/lib/types';
+import { getVoiceWarning, getSafetyTips } from '@/lib/actions';
+import type { DriHistoryPoint, Alert, AlertContext } from '@/lib/types';
 
 const DRI_THRESHOLD = 70;
 const SIMULATION_INTERVAL = 2000; // 2 seconds
 const ALERT_COOLDOWN = 15000; // 15 seconds
 const MAX_HISTORY = 50;
 
-// State to simulate drowsiness behavior
 const simState = {
   isDrowsy: false,
   drowsinessChance: 0.1,
@@ -20,12 +19,12 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   const [dri, setDri] = useState(0);
   const [history, setHistory] = useState<DriHistoryPoint[]>([{ time: Date.now(), dri: 0 }]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const alertContextMap = useRef(new Map<string, AlertContext>());
   const lastAlertTimestamp = useRef<number>(0);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
   const speak = (text: string) => {
     if ('speechSynthesis' in window && text) {
-      // Cancel any previous speech to avoid overlapping warnings
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
@@ -34,7 +33,7 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     }
   };
 
-  const handleHighDri = async (currentDri: number) => {
+  const handleHighDri = useCallback(async (currentDri: number, currentHistory: DriHistoryPoint[]) => {
     const now = Date.now();
     if (now - lastAlertTimestamp.current < ALERT_COOLDOWN) {
       return;
@@ -42,20 +41,28 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     lastAlertTimestamp.current = now;
 
     const alertId = `alert-${now}`;
-    // Use "Fatigue detected" as requested
-    setAlerts((prev) => [{ id: alertId, time: now, message: `Fatigue detected`, dri: currentDri }, ...prev]);
-    
+    const newAlert: Alert = { id: alertId, time: now, message: 'Fatigue detected', dri: currentDri };
+    setAlerts(prev => [newAlert, ...prev]);
+
     try {
+      const driHistoryStr = currentHistory.map(p => p.dri).join(',');
+      const safetyTips = await getSafetyTips(driHistoryStr, alerts.length + 1);
+      
+      alertContextMap.current.set(alertId, {
+        history: currentHistory,
+        safetyTip: safetyTips.split('\n')[0] || 'Stay alert and drive safe.',
+      });
+
       const warning = await getVoiceWarning(currentDri);
       speak(warning);
+
     } catch (error) {
-      console.error('Failed to get voice warning:', error);
+      console.error('Failed to get voice warning or safety tips:', error);
       speak('High risk detected. Please take a break now.');
     }
-  };
+  }, [alerts.length]);
 
   const runSimulation = useCallback(() => {
-    // Decide if the driver is getting drowsy or waking up
     if (!simState.isDrowsy && Math.random() < simState.drowsinessChance) {
       simState.isDrowsy = true;
     } else if (simState.isDrowsy && Math.random() < simState.wakeUpChance) {
@@ -64,40 +71,38 @@ export function useDriverMonitoring(isMonitoring: boolean) {
 
     setDri(prevDri => {
       let newDri;
-      
       if (simState.isDrowsy) {
-        // When "eyes are closed", jump DRI to the 75-95 range
         newDri = 75 + Math.random() * 20;
       } else {
-        // When "eyes are open", DRI should be low. Let's drop it to the 5-25 range.
         newDri = 5 + Math.random() * 20;
       }
       
-      // Clamp DRI between 0 and 100
       newDri = Math.max(0, Math.min(100, newDri));
       const finalDri = Math.round(newDri);
 
-      setHistory((prevHistory) => {
-          const newHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
-          if (newHistory.length > MAX_HISTORY) {
-              return newHistory.slice(newHistory.length - MAX_HISTORY);
-          }
-          return newHistory;
+      let updatedHistory: DriHistoryPoint[] = [];
+      setHistory(prevHistory => {
+        updatedHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
+        if (updatedHistory.length > MAX_HISTORY) {
+          return updatedHistory.slice(updatedHistory.length - MAX_HISTORY);
+        }
+        return updatedHistory;
       });
 
       if (finalDri > DRI_THRESHOLD) {
-          handleHighDri(finalDri);
+          handleHighDri(finalDri, updatedHistory);
       }
       
       return finalDri;
     });
-  }, []);
+  }, [handleHighDri]);
 
   const startMonitoring = useCallback(() => {
     if (intervalIdRef.current) return;
-    simState.isDrowsy = false; // Reset simulation state
+    simState.isDrowsy = false;
     setHistory([{ time: Date.now(), dri: 0 }]);
     setAlerts([]);
+    alertContextMap.current.clear();
     setDri(0);
     lastAlertTimestamp.current = 0;
     intervalIdRef.current = setInterval(runSimulation, SIMULATION_INTERVAL);
@@ -108,10 +113,13 @@ export function useDriverMonitoring(isMonitoring: boolean) {
       clearInterval(intervalIdRef.current);
       intervalIdRef.current = null;
     }
-    // ensure speech is cancelled when monitoring stops
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
+  }, []);
+  
+  const getAlertContext = useCallback((alertId: string) => {
+    return alertContextMap.current.get(alertId);
   }, []);
 
   useEffect(() => {
@@ -120,9 +128,8 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     } else {
       stopMonitoring();
     }
-    // Cleanup on unmount
     return stopMonitoring;
   }, [isMonitoring, startMonitoring, stopMonitoring]);
 
-  return { dri, history, alerts, startMonitoring, stopMonitoring };
+  return { dri, history, alerts, startMonitoring, stopMonitoring, getAlertContext };
 }

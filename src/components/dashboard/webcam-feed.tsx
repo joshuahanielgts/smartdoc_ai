@@ -15,7 +15,7 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
   const streamRef = useRef<MediaStream | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     const getCameraPermission = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -32,6 +32,11 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
+        toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description: 'Please enable camera permissions in your browser settings.',
+        });
       }
     };
 
@@ -52,17 +57,7 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
     return () => {
       stopCamera();
     };
-  }, [isMonitoring]);
-
-  useEffect(() => {
-    if (hasCameraPermission === false) {
-      toast({
-        variant: 'destructive',
-        title: 'Camera Access Denied',
-        description: 'Please enable camera permissions in your browser settings.',
-      });
-    }
-  }, [hasCameraPermission, toast]);
+  }, [isMonitoring, toast]);
 
   return (
     <Card className="h-full glass-card">

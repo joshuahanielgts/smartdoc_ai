@@ -9,3 +9,8 @@ export type Alert = {
   message: string;
   dri: number;
 };
+
+export type AlertContext = {
+  history: DriHistoryPoint[];
+  safetyTip: string;
+};
