@@ -1,13 +1,11 @@
+
 'use client';
 
-import { Play, Square, Siren, Loader2 } from 'lucide-react';
+import { Play, Square, Siren } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NotificationCenter } from '@/components/dashboard/notification-center';
 import type { Alert, AlertContext } from '@/lib/types';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { triggerSOS } from '@/lib/actions';
-import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
 
 type DashboardHeaderProps = {
   isMonitoring: boolean;
@@ -18,27 +16,8 @@ type DashboardHeaderProps = {
 };
 
 export function DashboardHeader({ isMonitoring, onStart, onStop, alerts, getAlertContext }: DashboardHeaderProps) {
-  const { toast } = useToast();
-  const [isSosLoading, setIsSosLoading] = useState(false);
-
-  const handleSosClick = async () => {
-    setIsSosLoading(true);
-    try {
-      const result = await triggerSOS('user-001', 'Highway 42, near exit 7');
-      toast({
-        variant: 'destructive',
-        title: 'SOS Alert Dispatched',
-        description: `${result.message} (Confirmation: ${result.confirmationId})`,
-      });
-    } catch (error) {
-      console.error('SOS Error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to dispatch SOS alert.',
-      });
-    }
-    setIsSosLoading(false);
+  const handleSosClick = () => {
+    window.location.href = 'tel:+919667745648';
   };
 
   return (
@@ -56,8 +35,8 @@ export function DashboardHeader({ isMonitoring, onStart, onStop, alerts, getAler
             <Square className="mr-2 h-4 w-4" /> Stop Monitoring
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={handleSosClick} disabled={isSosLoading} className="border-amber-500 text-amber-500 hover:bg-amber-500/10 hover:text-amber-400">
-           {isSosLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Siren className="mr-2 h-4 w-4" />}
+        <Button size="sm" variant="outline" onClick={handleSosClick} className="border-amber-500 text-amber-500 hover:bg-amber-500/10 hover:text-amber-400">
+           <Siren className="mr-2 h-4 w-4" />
           Trigger SOS
         </Button>
         <NotificationCenter alerts={alerts} getAlertContext={getAlertContext} />
