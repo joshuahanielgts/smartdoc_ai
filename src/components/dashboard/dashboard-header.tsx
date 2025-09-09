@@ -1,5 +1,4 @@
 import { Play, Square } from 'lucide-react';
-import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { NotificationCenter } from '@/components/dashboard/notification-center';
 import type { Alert, AlertContext } from '@/lib/types';
@@ -17,7 +16,7 @@ export function DashboardHeader({ isMonitoring, onStart, onStop, alerts, getAler
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/10 bg-transparent px-4 backdrop-blur-sm md:px-8">
       <div className="flex items-center gap-3">
-        <Logo />
+        <h1 className="text-xl font-bold text-foreground">LucidDrive AI</h1>
       </div>
       <div className="flex items-center gap-4">
         {!isMonitoring ? (
