@@ -54,11 +54,6 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Left Column */}
             <div className="flex flex-col gap-6">
-                <Card className="glass-card w-full h-[400px]">
-                    <CardContent className="p-0 h-full">
-                        <spline-viewer url="https://prod.spline.design/DpPWS8NEKX-6UIzO/scene.splinecode" />
-                    </CardContent>
-                </Card>
               <DriHistoryChart history={history} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AlertLog alerts={alerts} />
@@ -72,6 +67,13 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+        <div className="mt-8">
+            <Card className="glass-card w-full h-[250px]">
+                <CardContent className="p-0 h-full">
+                    <spline-viewer url="https://prod.spline.design/DpPWS8NEKX-6UIzO/scene.splinecode" />
+                </CardContent>
+            </Card>
+        </div>
       </main>
     </div>
   );
