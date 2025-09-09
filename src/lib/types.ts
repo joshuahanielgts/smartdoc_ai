@@ -14,3 +14,11 @@ export type AlertContext = {
   history: DriHistoryPoint[];
   safetyTip: string;
 };
+
+export type EmergencyService = {
+  name: string;
+  type: 'Hospital' | 'Police Station';
+  address: string;
+  phone: string;
+  mapsUrl: string;
+};

@@ -16,12 +16,24 @@ const PredictHighRiskZonesInputSchema = z.object({
 });
 export type PredictHighRiskZonesInput = z.infer<typeof PredictHighRiskZonesInputSchema>;
 
+const ServiceSchema = z.object({
+  name: z.string().describe('The name of the emergency service.'),
+  type: z.enum(['Hospital', 'Police Station']).describe('The type of service.'),
+  address: z.string().describe('The full address of the service.'),
+  phone: z.string().describe('A realistic, fictional phone number for the service.'),
+  mapsUrl: z.string().url().describe('A valid Google Maps URL for the address.'),
+});
+
 const PredictHighRiskZonesOutputSchema = z.object({
-  emergencyServices: z.array(z.string()).describe('A list of nearby emergency services.'),
+  emergencyServices: z
+    .array(ServiceSchema)
+    .describe('A list of nearby emergency services.'),
 });
 export type PredictHighRiskZonesOutput = z.infer<typeof PredictHighRiskZonesOutputSchema>;
 
-export async function predictHighRiskZones(input: PredictHighRiskZonesInput): Promise<PredictHighRiskZonesOutput> {
+export async function predictHighRiskZones(
+  input: PredictHighRiskZonesInput
+): Promise<PredictHighRiskZonesOutput> {
   return predictHighRiskZonesFlow(input);
 }
 
@@ -35,13 +47,11 @@ const prompt = ai.definePrompt({
   - Latitude: {{{latitude}}}
   - Longitude: {{{longitude}}}
 
-  Provide a list of these three locations. For each, specify if it is a "Hospital" or "Police Station" and provide a realistic, fictional name and address for the purpose of this simulation.
+  For each service, provide a realistic, fictional name, address, phone number, and a valid Google Maps URL for the address.
+  - The phone number should be in a plausible local format.
+  - The Google Maps URL should be a proper URL pointing to the address.
 
-  Example format for the output array:
-  - "Hospital: Mercy General Hospital, 123 Health St, Cityville"
-  - "Hospital: City Central Hospital, 456 Care Ave, Cityville"
-  - "Police Station: 1st Precinct, 789 Law Blvd, Cityville"
-  `,
+  Return the list of these three locations.`,
 });
 
 const predictHighRiskZonesFlow = ai.defineFlow(

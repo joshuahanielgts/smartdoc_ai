@@ -4,7 +4,7 @@ import { provideVoiceAssistantWarnings } from '@/ai/flows/provide-voice-assistan
 import { generatePersonalizedSafetyTips } from '@/ai/flows/generate-personalized-safety-tips';
 import { generateDailySessionSummary, type GenerateDailySessionSummaryInput } from '@/ai/flows/generate-daily-session-summaries';
 import { generateSpeech } from '@/ai/flows/generate-speech';
-import { predictHighRiskZones } from '@/ai/flows/predict-high-risk-zones';
+import { predictHighRiskZones, type PredictHighRiskZonesOutput } from '@/ai/flows/predict-high-risk-zones';
 import { triggerSOSAlert } from '@/ai/flows/trigger-sos-alert';
 
 export async function getVoiceWarning(dri: number) {
@@ -48,13 +48,13 @@ export async function getSpeech(text: string) {
   }
 }
 
-export async function getHighRiskZonePrediction(latitude: number, longitude: number) {
+export async function getHighRiskZonePrediction(latitude: number, longitude: number): Promise<PredictHighRiskZonesOutput> {
   try {
     const result = await predictHighRiskZones({ latitude, longitude });
     return result;
   } catch (error) {
     console.error('Error getting high risk zone prediction:', error);
-    return { emergencyServices: ['Error predicting zones.'] };
+    return { emergencyServices: [] };
   }
 }
 
