@@ -10,7 +10,7 @@ import { DriHistoryChart } from '@/components/dashboard/dri-history-chart';
 import { SafetyTips } from '@/components/dashboard/safety-tips';
 import { SessionSummary } from '@/components/dashboard/session-summary';
 import { RiskZoneForecast } from '@/components/dashboard/risk-zone-forecast';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 declare global {
   namespace JSX {
@@ -53,22 +53,23 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* Left & Middle Column */}
-            <div className="flex flex-col col-span-2 gap-6">
-               <Card className="glass-card aspect-video w-full h-full min-h-96">
+            {/* Left Column: Car and key stats */}
+            <div className="flex flex-col col-span-1 gap-6">
+              <Card className="glass-card aspect-[4/3] w-full h-full">
                 <spline-viewer url="https://prod.spline.design/rB-gTsp8PA4u2s64/scene.splinecode"></spline-viewer>
               </Card>
+              <WebcamFeed isMonitoring={isMonitoring} isHumanPresent={isHumanPresent} />
+              <DriMeter dri={dri} />
+            </div>
+            
+            {/* Right Column: Charts and tools */}
+            <div className="flex flex-col col-span-2 gap-6">
               <DriHistoryChart history={history} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AlertLog alerts={alerts} />
                 <SafetyTips history={history} alerts={alerts} />
               </div>
               <RiskZoneForecast />
-            </div>
-            {/* Right Column */}
-            <div className="flex flex-col gap-6">
-              <WebcamFeed isMonitoring={isMonitoring} isHumanPresent={isHumanPresent} />
-              <DriMeter dri={dri} />
             </div>
           </div>
         )}
