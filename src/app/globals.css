@@ -78,6 +78,6 @@ body {
 
 @layer components {
   .glass-card {
-    @apply bg-secondary/30 backdrop-blur-sm border border-white/10 rounded-xl;
+    @apply bg-secondary/30 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg;
   }
 }
