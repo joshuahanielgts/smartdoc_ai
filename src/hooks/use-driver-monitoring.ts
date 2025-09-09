@@ -11,11 +11,6 @@ const MAX_HISTORY = 50;
 
 const simState = {
   isDrowsy: false,
-  isHumanPresent: true,
-  drowsinessChance: 0.1,
-  wakeUpChance: 0.3,
-  humanDisappearsChance: 0.05,
-  humanReappearsChance: 0.2,
 };
 
 export function useDriverMonitoring(isMonitoring: boolean) {
@@ -67,33 +62,15 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   }, [alerts.length]);
 
   const runSimulation = useCallback(() => {
-    // Simulate human presence
-    if (simState.isHumanPresent && Math.random() < simState.humanDisappearsChance) {
-      simState.isHumanPresent = false;
-    } else if (!simState.isHumanPresent && Math.random() < simState.humanReappearsChance) {
-      simState.isHumanPresent = true;
-    }
-    setIsHumanPresent(simState.isHumanPresent);
-
-    if (!simState.isHumanPresent) {
-      setDri(prevDri => {
-        const newDri = Math.max(0, prevDri - 5);
-        setHistory(prevHistory => {
-            const updatedHistory = [...prevHistory, { time: Date.now(), dri: newDri }];
-            if (updatedHistory.length > MAX_HISTORY) {
-                return updatedHistory.slice(updatedHistory.length - MAX_HISTORY);
-            }
-            return updatedHistory;
-        });
-        return newDri;
-      });
-      return;
-    }
+    // For demo purposes, we will always assume the human is present.
+    setIsHumanPresent(true);
 
     // Simulate drowsiness state change
-    if (!simState.isDrowsy && Math.random() < simState.drowsinessChance) {
+    const DrowsinessChance = 0.1;
+    const WakeUpChance = 0.3;
+    if (!simState.isDrowsy && Math.random() < DrowsinessChance) {
       simState.isDrowsy = true;
-    } else if (simState.isDrowsy && Math.random() < simState.wakeUpChance) {
+    } else if (simState.isDrowsy && Math.random() < WakeUpChance) {
       simState.isDrowsy = false;
     }
 
@@ -130,7 +107,6 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   const startMonitoring = useCallback(() => {
     if (intervalIdRef.current) return;
     simState.isDrowsy = false;
-    simState.isHumanPresent = true;
     setDri(0);
     setHistory([{ time: Date.now(), dri: 0 }]);
     setAlerts([]);
