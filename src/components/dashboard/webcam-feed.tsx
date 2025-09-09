@@ -3,14 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Video, VideoOff } from 'lucide-react';
+import { Video, VideoOff, UserX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type WebcamFeedProps = {
   isMonitoring: boolean;
+  isHumanPresent: boolean;
 };
 
-export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
+export function WebcamFeed({ isMonitoring, isHumanPresent }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -73,6 +74,14 @@ export function WebcamFeed({ isMonitoring }: WebcamFeedProps) {
                 <VideoOff className="h-10 w-10" />
                 <p>Camera is off</p>
                  <p className="text-xs">Click "Start Monitoring" to begin.</p>
+            </div>
+          </div>
+        )}
+        {isMonitoring && !isHumanPresent && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <UserX className="h-10 w-10" />
+              <p>No human present</p>
             </div>
           </div>
         )}

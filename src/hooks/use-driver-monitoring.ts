@@ -11,12 +11,16 @@ const MAX_HISTORY = 50;
 
 const simState = {
   isDrowsy: false,
+  isHumanPresent: true,
   drowsinessChance: 0.1,
   wakeUpChance: 0.3,
+  humanDisappearsChance: 0.05,
+  humanReappearsChance: 0.2,
 };
 
 export function useDriverMonitoring(isMonitoring: boolean) {
   const [dri, setDri] = useState(0);
+  const [isHumanPresent, setIsHumanPresent] = useState(true);
   const [history, setHistory] = useState<DriHistoryPoint[]>([{ time: Date.now(), dri: 0 }]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const alertContextMap = useRef(new Map<string, AlertContext>());
@@ -63,6 +67,27 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   }, [alerts.length]);
 
   const runSimulation = useCallback(() => {
+    // Simulate human presence
+    if (simState.isHumanPresent && Math.random() < simState.humanDisappearsChance) {
+      simState.isHumanPresent = false;
+    } else if (!simState.isHumanPresent && Math.random() < simState.humanReappearsChance) {
+      simState.isHumanPresent = true;
+    }
+    setIsHumanPresent(simState.isHumanPresent);
+
+    if (!simState.isHumanPresent) {
+      setDri(0);
+      setHistory(prevHistory => {
+        const updatedHistory = [...prevHistory, { time: Date.now(), dri: 0 }];
+        if (updatedHistory.length > MAX_HISTORY) {
+          return updatedHistory.slice(updatedHistory.length - MAX_HISTORY);
+        }
+        return updatedHistory;
+      });
+      return;
+    }
+
+    // Simulate drowsiness
     if (!simState.isDrowsy && Math.random() < simState.drowsinessChance) {
       simState.isDrowsy = true;
     } else if (simState.isDrowsy && Math.random() < simState.wakeUpChance) {
@@ -100,10 +125,12 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   const startMonitoring = useCallback(() => {
     if (intervalIdRef.current) return;
     simState.isDrowsy = false;
+    simState.isHumanPresent = true;
     setHistory([{ time: Date.now(), dri: 0 }]);
     setAlerts([]);
     alertContextMap.current.clear();
     setDri(0);
+    setIsHumanPresent(true);
     lastAlertTimestamp.current = 0;
     intervalIdRef.current = setInterval(runSimulation, SIMULATION_INTERVAL);
   }, [runSimulation]);
@@ -131,5 +158,5 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     return stopMonitoring;
   }, [isMonitoring, startMonitoring, stopMonitoring]);
 
-  return { dri, history, alerts, startMonitoring, stopMonitoring, getAlertContext };
+  return { dri, history, alerts, isHumanPresent, startMonitoring, stopMonitoring, getAlertContext };
 }

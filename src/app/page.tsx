@@ -21,7 +21,7 @@ declare global {
 
 export default function DashboardPage() {
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const { dri, history, alerts, startMonitoring, stopMonitoring, getAlertContext } = useDriverMonitoring(isMonitoring);
+  const { dri, history, alerts, isHumanPresent, startMonitoring, stopMonitoring, getAlertContext } = useDriverMonitoring(isMonitoring);
   const [showSummary, setShowSummary] = useState(false);
 
   const handleStart = () => {
@@ -62,7 +62,7 @@ export default function DashboardPage() {
             </div>
             {/* Right Column */}
             <div className="flex flex-col gap-6">
-              <WebcamFeed isMonitoring={isMonitoring} />
+              <WebcamFeed isMonitoring={isMonitoring} isHumanPresent={isHumanPresent} />
               <DriMeter dri={dri} />
             </div>
           </div>
