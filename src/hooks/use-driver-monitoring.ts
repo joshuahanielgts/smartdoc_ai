@@ -9,14 +9,14 @@ const SIMULATION_INTERVAL = 2000; // 2 seconds
 const ALERT_COOLDOWN = 10000; // 10 seconds
 const MAX_HISTORY = 50;
 
-// This object will hold the state of our simulation
+// This object will hold the state of our NEW, reliable simulation
 const simState = {
-  // Simulates if the driver's eyes are closed (drowsy)
+  // Simulates if the driver's eyes are closed (isDrowsy = true) or open (isDrowsy = false)
   isDrowsy: false,
-  // A counter to control when the driver becomes drowsy or wakes up
+  // A counter to control when the state flips
   drowsinessCounter: 0,
-  // How many ticks until the state changes
-  ticksUntilChange: 8, // Start with a longer alert period
+  // Ticks until state change. Start with a longer alert period.
+  ticksUntilChange: 8, 
 };
 
 export function useDriverMonitoring(isMonitoring: boolean) {
@@ -72,21 +72,22 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     setIsHumanPresent(true); // For demo, always assume user is present.
     simState.drowsinessCounter++;
 
+    // When the counter reaches the threshold, flip the state
     if (simState.drowsinessCounter >= simState.ticksUntilChange) {
       simState.isDrowsy = !simState.isDrowsy;
       simState.drowsinessCounter = 0;
-      // Be drowsy for a shorter time (e.g., 3 ticks = 6s)
+      // Be drowsy for a shorter time (e.g., 4 ticks = 8s)
       // Be alert for a longer time (e.g., 8 ticks = 16s)
-      simState.ticksUntilChange = simState.isDrowsy ? 3 : 8; 
+      simState.ticksUntilChange = simState.isDrowsy ? 4 : 8; 
     }
 
     let newDri;
     if (simState.isDrowsy) {
-      // EYES CLOSED: Set DRI to a high value directly
-      newDri = 80 + Math.floor(Math.random() * 15); // e.g., 80-94
+      // EYES CLOSED: Set DRI to a high, stable value
+      newDri = 85 + Math.floor(Math.random() * 10); // 85-94
     } else {
-      // EYES OPEN: Set DRI to a low value directly
-      newDri = 5 + Math.floor(Math.random() * 15); // e.g., 5-19
+      // EYES OPEN: Set DRI to a low, stable value
+      newDri = 15 + Math.floor(Math.random() * 10); // 15-24
     }
     
     setDri(newDri);
@@ -94,11 +95,9 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     let updatedHistory: DriHistoryPoint[] = [];
     setHistory(prevHistory => {
       const newHistory = [...prevHistory, { time: Date.now(), dri: newDri }];
-      if (newHistory.length > MAX_HISTORY) {
-        updatedHistory = newHistory.slice(newHistory.length - MAX_HISTORY);
-      } else {
-        updatedHistory = newHistory;
-      }
+      updatedHistory = newHistory.length > MAX_HISTORY 
+        ? newHistory.slice(newHistory.length - MAX_HISTORY) 
+        : newHistory;
       return updatedHistory;
     });
 
@@ -111,7 +110,7 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   const startMonitoring = useCallback(() => {
     if (intervalIdRef.current) return;
     
-    // Reset simulation state
+    // Reset simulation state for a clean start
     simState.isDrowsy = false;
     simState.drowsinessCounter = 0;
     simState.ticksUntilChange = 8;
