@@ -5,7 +5,7 @@ import { getVoiceWarning, getSafetyTips } from '@/lib/actions';
 import type { DriHistoryPoint, Alert, AlertContext } from '@/lib/types';
 
 const DRI_HIGH_THRESHOLD = 70;
-const SIMULATION_INTERVAL = 1500; // 1.5 seconds for faster reaction in demo
+const SIMULATION_INTERVAL = 2000; // 2 seconds
 const ALERT_COOLDOWN = 10000; // 10 seconds
 const MAX_HISTORY = 50;
 
@@ -16,7 +16,7 @@ const simState = {
   // A counter to control when the driver becomes drowsy or wakes up
   drowsinessCounter: 0,
   // How many ticks until the state changes
-  ticksUntilChange: 10,
+  ticksUntilChange: 8, // Start with a longer alert period
 };
 
 export function useDriverMonitoring(isMonitoring: boolean) {
@@ -69,52 +69,43 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   }, [alerts.length]);
 
   const runSimulation = useCallback(() => {
-    // For the demo, we will always assume the human is present.
-    // This avoids the "No human present" bug during your presentation.
-    setIsHumanPresent(true);
-
+    setIsHumanPresent(true); // For demo, always assume user is present.
     simState.drowsinessCounter++;
 
-    // Check if it's time to toggle the drowsiness state
     if (simState.drowsinessCounter >= simState.ticksUntilChange) {
       simState.isDrowsy = !simState.isDrowsy;
       simState.drowsinessCounter = 0;
-      // Randomize the next change time to feel more natural
-      simState.ticksUntilChange = simState.isDrowsy ? 5 : 10; // Be drowsy for a shorter time
+      // Be drowsy for a shorter time (e.g., 3 ticks = 6s)
+      // Be alert for a longer time (e.g., 8 ticks = 16s)
+      simState.ticksUntilChange = simState.isDrowsy ? 3 : 8; 
     }
 
-    setDri(prevDri => {
-      let newDri;
-      if (simState.isDrowsy) {
-        // EYES CLOSED: DRI increases sharply towards a high value
-        newDri = prevDri + (20 + Math.random() * 10);
-        newDri = Math.min(newDri, 85 + Math.random() * 10); // Cap near 95
+    let newDri;
+    if (simState.isDrowsy) {
+      // EYES CLOSED: Set DRI to a high value directly
+      newDri = 80 + Math.floor(Math.random() * 15); // e.g., 80-94
+    } else {
+      // EYES OPEN: Set DRI to a low value directly
+      newDri = 5 + Math.floor(Math.random() * 15); // e.g., 5-19
+    }
+    
+    setDri(newDri);
+
+    let updatedHistory: DriHistoryPoint[] = [];
+    setHistory(prevHistory => {
+      const newHistory = [...prevHistory, { time: Date.now(), dri: newDri }];
+      if (newHistory.length > MAX_HISTORY) {
+        updatedHistory = newHistory.slice(newHistory.length - MAX_HISTORY);
       } else {
-        // EYES OPEN: DRI decreases sharply towards a low value
-        newDri = prevDri - (30 + Math.random() * 10);
-        newDri = Math.max(newDri, 5 + Math.random() * 10); // Floor near 5
+        updatedHistory = newHistory;
       }
-      
-      const finalDri = Math.max(0, Math.min(100, Math.round(newDri)));
-
-      let updatedHistory: DriHistoryPoint[] = [];
-      setHistory(prevHistory => {
-        // Ensure history doesn't grow indefinitely
-        const newHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
-        if (newHistory.length > MAX_HISTORY) {
-          updatedHistory = newHistory.slice(newHistory.length - MAX_HISTORY);
-        } else {
-          updatedHistory = newHistory;
-        }
-        return updatedHistory;
-      });
-
-      if (finalDri > DRI_HIGH_THRESHOLD) {
-          handleHighDri(finalDri, updatedHistory);
-      }
-      
-      return finalDri;
+      return updatedHistory;
     });
+
+    if (newDri > DRI_HIGH_THRESHOLD) {
+        handleHighDri(newDri, updatedHistory);
+    }
+
   }, [handleHighDri]);
 
   const startMonitoring = useCallback(() => {
@@ -123,7 +114,7 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     // Reset simulation state
     simState.isDrowsy = false;
     simState.drowsinessCounter = 0;
-    simState.ticksUntilChange = 10; // Start with a longer period of being alert
+    simState.ticksUntilChange = 8;
     
     // Reset UI state
     setDri(0);
@@ -133,7 +124,6 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     setIsHumanPresent(true);
     lastAlertTimestamp.current = 0;
     
-    // Start the simulation loop
     intervalIdRef.current = setInterval(runSimulation, SIMULATION_INTERVAL);
   }, [runSimulation]);
 
@@ -152,14 +142,8 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   }, []);
 
   useEffect(() => {
-    if (isMonitoring) {
-        startMonitoring();
-    } else {
-      stopMonitoring();
-    }
-    // Cleanup on unmount
-    return stopMonitoring;
-  }, [isMonitoring, startMonitoring, stopMonitoring]);
+    return stopMonitoring; // Cleanup on unmount
+  }, [stopMonitoring]);
 
   return { dri, history, alerts, isHumanPresent, startMonitoring, stopMonitoring, getAlertContext };
 }
