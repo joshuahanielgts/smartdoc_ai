@@ -4,6 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
+import Script from 'next/script';
 
 const fontSans = Inter({
   subsets: ['latin'],
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
+        <Script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.57/build/spline-viewer.js" async />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

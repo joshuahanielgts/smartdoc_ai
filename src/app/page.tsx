@@ -9,6 +9,15 @@ import { AlertLog } from '@/components/dashboard/alert-log';
 import { DriHistoryChart } from '@/components/dashboard/dri-history-chart';
 import { SafetyTips } from '@/components/dashboard/safety-tips';
 import { SessionSummary } from '@/components/dashboard/session-summary';
+import { Card, CardContent } from '@/components/ui/card';
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'spline-viewer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & { url: string };
+    }
+  }
+}
 
 export default function DashboardPage() {
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -42,15 +51,22 @@ export default function DashboardPage() {
              <SessionSummary history={history} alerts={alerts} autoGenerate={true} />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
-            <div className="lg:col-span-2 xl:col-span-3 flex flex-col gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Left Column */}
+            <div className="flex flex-col gap-6">
+                <Card className="glass-card w-full h-[400px]">
+                    <CardContent className="p-0 h-full">
+                        <spline-viewer url="https://prod.spline.design/DpPWS8NEKX-6UIzO/scene.splinecode" />
+                    </CardContent>
+                </Card>
               <DriHistoryChart history={history} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AlertLog alerts={alerts} />
                 <SafetyTips history={history} alerts={alerts} />
               </div>
             </div>
-            <div className="lg:col-span-1 xl:col-span-1 flex flex-col gap-6">
+            {/* Right Column */}
+            <div className="flex flex-col gap-6">
               <WebcamFeed isMonitoring={isMonitoring} />
               <DriMeter dri={dri} />
             </div>
