@@ -41,17 +41,33 @@ const prompt = ai.definePrompt({
   name: 'predictHighRiskZonesPrompt',
   input: {schema: PredictHighRiskZonesInputSchema},
   output: {schema: PredictHighRiskZonesOutputSchema},
-  prompt: `You are an emergency service locator. Based on the provided GPS coordinates, identify the two closest hospitals and the single closest police station.
+  prompt: `You are an emergency service locator. Based on the provided GPS coordinates, which you should assume are in Vadapalani, Chennai, India, identify the two closest hospitals and the single closest police station using the exact information provided below.
 
   Driver's Location:
   - Latitude: {{{latitude}}}
   - Longitude: {{{longitude}}}
 
-  For each service, provide a realistic, fictional name, address, phone number, and a valid Google Maps URL for the address.
-  - The phone number should be in a plausible local format.
-  - The Google Maps URL should be a proper URL pointing to the address.
+  Use ONLY the following information for your response. Do not use any other hospital or police station names.
 
-  Return the list of these three locations.`,
+  - Hospital 1:
+    - Name: SIMS Hospital
+    - Address: No.1, Jawaharlal Nehru Salai, 100 Feet Road, Vadapalani, Chennai, Tamil Nadu 600026
+    - Phone: "+91 44 4921 2121"
+    - Google Maps URL: "https://www.google.com/maps/search/?api=1&query=SIMS+Hospital+Vadapalani"
+
+  - Hospital 2:
+    - Name: Kauvery Hospital
+    - Address: 100 Feet Rd, opp. to Vadapalani Metro Station, Vadapalani, Chennai, Tamil Nadu 600026
+    - Phone: "+91 44 4020 6000"
+    - Google Maps URL: "https://www.google.com/maps/search/?api=1&query=Kauvery+Hospital+Vadapalani"
+    
+  - Police Station:
+    - Name: Vadapalani Police Station (H4)
+    - Address: Jawaharlal Nehru Rd, opp. to SRM college, Vadapalani, Chennai, Tamil Nadu 600026
+    - Phone: "+91 44 2345 2596"
+    - Google Maps URL: "https://www.google.com/maps/search/?api=1&query=Vadapalani+Police+Station+H4"
+
+  Return a list of these three locations exactly as specified.`,
 });
 
 const predictHighRiskZonesFlow = ai.defineFlow(
