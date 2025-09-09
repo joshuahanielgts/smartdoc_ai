@@ -48,13 +48,13 @@ export async function getSpeech(text: string) {
   }
 }
 
-export async function getHighRiskZonePrediction(driverId: string, historicalData: string[]) {
+export async function getHighRiskZonePrediction(latitude: number, longitude: number) {
   try {
-    const result = await predictHighRiskZones({ driverId, historicalData });
+    const result = await predictHighRiskZones({ latitude, longitude });
     return result;
   } catch (error) {
     console.error('Error getting high risk zone prediction:', error);
-    return { predictedZones: ['Error predicting zones.'] };
+    return { emergencyServices: ['Error predicting zones.'] };
   }
 }
 

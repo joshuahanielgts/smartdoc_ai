@@ -11,13 +11,13 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const PredictHighRiskZonesInputSchema = z.object({
-  driverId: z.string().describe('The ID of the driver.'),
-  historicalData: z.array(z.string()).describe('A list of historical locations or routes.'),
+  latitude: z.number().describe('The latitude of the driver.'),
+  longitude: z.number().describe('The longitude of the driver.'),
 });
 export type PredictHighRiskZonesInput = z.infer<typeof PredictHighRiskZonesInputSchema>;
 
 const PredictHighRiskZonesOutputSchema = z.object({
-  predictedZones: z.array(z.string()).describe('A list of predicted high-risk zones.'),
+  emergencyServices: z.array(z.string()).describe('A list of nearby emergency services.'),
 });
 export type PredictHighRiskZonesOutput = z.infer<typeof PredictHighRiskZonesOutputSchema>;
 
@@ -29,13 +29,18 @@ const prompt = ai.definePrompt({
   name: 'predictHighRiskZonesPrompt',
   input: {schema: PredictHighRiskZonesInputSchema},
   output: {schema: PredictHighRiskZonesOutputSchema},
-  prompt: `You are a predictive analytics model for driver safety. Your task is to identify high-risk driving zones.
+  prompt: `You are an emergency service locator. Based on the provided GPS coordinates, identify the two closest hospitals and the single closest police station.
 
-  Based on the provided historical driving data, predict three potential high-risk zones for the upcoming trips. These zones could be specific intersections, stretches of highway, or general areas known for congestion or accidents.
+  Driver's Location:
+  - Latitude: {{{latitude}}}
+  - Longitude: {{{longitude}}}
 
-  Historical Data: {{#each historicalData}} - {{{this}}}{{/each}}
+  Provide a list of these three locations. For each, specify if it is a "Hospital" or "Police Station" and provide a realistic, fictional name and address for the purpose of this simulation.
 
-  For this simulation, provide three realistic but fictional high-risk zones. For example: "Intersection of Oak St and Pine Ave due to morning congestion", "Highway 101, mile 45, known for sharp curves", "Downtown district during evening rush hour".
+  Example format for the output array:
+  - "Hospital: Mercy General Hospital, 123 Health St, Cityville"
+  - "Hospital: City Central Hospital, 456 Care Ave, Cityville"
+  - "Police Station: 1st Precinct, 789 Law Blvd, Cityville"
   `,
 });
 
