@@ -55,6 +55,9 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Left & Middle Column */}
             <div className="flex flex-col col-span-2 gap-6">
+               <Card className="glass-card aspect-video w-full h-full min-h-96">
+                <spline-viewer url="https://prod.spline.design/rB-gTsp8PA4u2s64/scene.splinecode"></spline-viewer>
+              </Card>
               <DriHistoryChart history={history} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AlertLog alerts={alerts} />
