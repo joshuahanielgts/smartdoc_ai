@@ -56,7 +56,7 @@ export default function DashboardPage() {
             {/* Left Column: Car and key stats */}
             <div className="flex flex-col col-span-1 gap-6">
               <Card className="glass-card aspect-[4/3] w-full h-full">
-                <spline-viewer url="https://prod.spline.design/rB-gTsp8PA4u2s64/scene.splinecode"></spline-viewer>
+                <spline-viewer url="https://prod.spline.design/DpPWS8NEKX-6UIzO/scene.splinecode"></spline-viewer>
               </Card>
               <WebcamFeed isMonitoring={isMonitoring} isHumanPresent={isHumanPresent} />
               <DriMeter dri={dri} />
