@@ -4,13 +4,19 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getVoiceWarning, getSafetyTips } from '@/lib/actions';
 import type { DriHistoryPoint, Alert, AlertContext } from '@/lib/types';
 
-const DRI_THRESHOLD = 70;
-const SIMULATION_INTERVAL = 2000; // 2 seconds
-const ALERT_COOLDOWN = 15000; // 15 seconds
+const DRI_HIGH_THRESHOLD = 70;
+const SIMULATION_INTERVAL = 1500; // 1.5 seconds for faster reaction in demo
+const ALERT_COOLDOWN = 10000; // 10 seconds
 const MAX_HISTORY = 50;
 
+// This object will hold the state of our simulation
 const simState = {
+  // Simulates if the driver's eyes are closed (drowsy)
   isDrowsy: false,
+  // A counter to control when the driver becomes drowsy or wakes up
+  drowsinessCounter: 0,
+  // How many ticks until the state changes
+  ticksUntilChange: 10,
 };
 
 export function useDriverMonitoring(isMonitoring: boolean) {
@@ -45,11 +51,12 @@ export function useDriverMonitoring(isMonitoring: boolean) {
 
     try {
       const driHistoryStr = currentHistory.map(p => p.dri).join(',');
-      const safetyTips = await getSafetyTips(driHistoryStr, alerts.length + 1);
+      const safetyTipsResult = await getSafetyTips(driHistoryStr, alerts.length + 1);
+      const safetyTips = safetyTipsResult || 'Stay alert and drive safe.';
       
       alertContextMap.current.set(alertId, {
         history: currentHistory,
-        safetyTip: safetyTips.split('\n')[0] || 'Stay alert and drive safe.',
+        safetyTip: safetyTips.split('\n')[0],
       });
 
       const warning = await getVoiceWarning(currentDri);
@@ -62,41 +69,47 @@ export function useDriverMonitoring(isMonitoring: boolean) {
   }, [alerts.length]);
 
   const runSimulation = useCallback(() => {
-    // For demo purposes, we will always assume the human is present.
+    // For the demo, we will always assume the human is present.
+    // This avoids the "No human present" bug during your presentation.
     setIsHumanPresent(true);
 
-    // Simulate drowsiness state change
-    const DrowsinessChance = 0.1;
-    const WakeUpChance = 0.3;
-    if (!simState.isDrowsy && Math.random() < DrowsinessChance) {
-      simState.isDrowsy = true;
-    } else if (simState.isDrowsy && Math.random() < WakeUpChance) {
-      simState.isDrowsy = false;
+    simState.drowsinessCounter++;
+
+    // Check if it's time to toggle the drowsiness state
+    if (simState.drowsinessCounter >= simState.ticksUntilChange) {
+      simState.isDrowsy = !simState.isDrowsy;
+      simState.drowsinessCounter = 0;
+      // Randomize the next change time to feel more natural
+      simState.ticksUntilChange = simState.isDrowsy ? 5 : 10; // Be drowsy for a shorter time
     }
 
     setDri(prevDri => {
       let newDri;
       if (simState.isDrowsy) {
-        // DRI increases when drowsy
-        newDri = prevDri + (5 + Math.random() * 5);
+        // EYES CLOSED: DRI increases sharply towards a high value
+        newDri = prevDri + (20 + Math.random() * 10);
+        newDri = Math.min(newDri, 85 + Math.random() * 10); // Cap near 95
       } else {
-        // DRI decreases when not drowsy
-        newDri = prevDri - (3 + Math.random() * 3);
+        // EYES OPEN: DRI decreases sharply towards a low value
+        newDri = prevDri - (30 + Math.random() * 10);
+        newDri = Math.max(newDri, 5 + Math.random() * 10); // Floor near 5
       }
       
-      newDri = Math.max(0, Math.min(100, newDri));
-      const finalDri = Math.round(newDri);
+      const finalDri = Math.max(0, Math.min(100, Math.round(newDri)));
 
       let updatedHistory: DriHistoryPoint[] = [];
       setHistory(prevHistory => {
-        updatedHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
-        if (updatedHistory.length > MAX_HISTORY) {
-          return updatedHistory.slice(updatedHistory.length - MAX_HISTORY);
+        // Ensure history doesn't grow indefinitely
+        const newHistory = [...prevHistory, { time: Date.now(), dri: finalDri }];
+        if (newHistory.length > MAX_HISTORY) {
+          updatedHistory = newHistory.slice(newHistory.length - MAX_HISTORY);
+        } else {
+          updatedHistory = newHistory;
         }
         return updatedHistory;
       });
 
-      if (finalDri > DRI_THRESHOLD) {
+      if (finalDri > DRI_HIGH_THRESHOLD) {
           handleHighDri(finalDri, updatedHistory);
       }
       
@@ -106,13 +119,21 @@ export function useDriverMonitoring(isMonitoring: boolean) {
 
   const startMonitoring = useCallback(() => {
     if (intervalIdRef.current) return;
+    
+    // Reset simulation state
     simState.isDrowsy = false;
+    simState.drowsinessCounter = 0;
+    simState.ticksUntilChange = 10; // Start with a longer period of being alert
+    
+    // Reset UI state
     setDri(0);
     setHistory([{ time: Date.now(), dri: 0 }]);
     setAlerts([]);
     alertContextMap.current.clear();
     setIsHumanPresent(true);
     lastAlertTimestamp.current = 0;
+    
+    // Start the simulation loop
     intervalIdRef.current = setInterval(runSimulation, SIMULATION_INTERVAL);
   }, [runSimulation]);
 
@@ -136,6 +157,7 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     } else {
       stopMonitoring();
     }
+    // Cleanup on unmount
     return stopMonitoring;
   }, [isMonitoring, startMonitoring, stopMonitoring]);
 
