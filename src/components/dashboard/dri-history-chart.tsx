@@ -1,7 +1,8 @@
+
 'use client';
 
 import { Activity } from 'lucide-react';
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import type { DriHistoryPoint } from '@/lib/types';
@@ -19,7 +20,7 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
   };
   
   const chartData = history.map(point => ({
-    time: new Date(point.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    time: new Date(point.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     dri: point.dri,
   }));
 
@@ -49,7 +50,7 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 5)}
+              tickFormatter={(value) => value.slice(0, 8)}
               stroke="hsl(var(--foreground))"
             />
             <YAxis
@@ -83,6 +84,7 @@ export function DriHistoryChart({ history }: DriHistoryChartProps) {
               fill="url(#fillGradient)"
               stroke="var(--color-dri)"
               stackId="a"
+              dot={false}
             />
           </AreaChart>
         </ChartContainer>
