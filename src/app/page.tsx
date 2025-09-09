@@ -9,6 +9,7 @@ import { AlertLog } from '@/components/dashboard/alert-log';
 import { DriHistoryChart } from '@/components/dashboard/dri-history-chart';
 import { SafetyTips } from '@/components/dashboard/safety-tips';
 import { SessionSummary } from '@/components/dashboard/session-summary';
+import { RiskZoneForecast } from '@/components/dashboard/risk-zone-forecast';
 import { Card, CardContent } from '@/components/ui/card';
 
 declare global {
@@ -51,14 +52,15 @@ export default function DashboardPage() {
              <SessionSummary history={history} alerts={alerts} autoGenerate={true} />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Left Column */}
-            <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {/* Left & Middle Column */}
+            <div className="flex flex-col col-span-2 gap-6">
               <DriHistoryChart history={history} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <AlertLog alerts={alerts} />
                 <SafetyTips history={history} alerts={alerts} />
               </div>
+              <RiskZoneForecast />
             </div>
             {/* Right Column */}
             <div className="flex flex-col gap-6">
@@ -67,13 +69,6 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-        <div className="mt-8">
-            <Card className="glass-card w-full h-[250px]">
-                <CardContent className="p-0 h-full">
-                    <spline-viewer url="https://prod.spline.design/DpPWS8NEKX-6UIzO/scene.splinecode" />
-                </CardContent>
-            </Card>
-        </div>
       </main>
     </div>
   );
