@@ -76,18 +76,21 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     setIsHumanPresent(simState.isHumanPresent);
 
     if (!simState.isHumanPresent) {
-      setDri(0);
-      setHistory(prevHistory => {
-        const updatedHistory = [...prevHistory, { time: Date.now(), dri: 0 }];
-        if (updatedHistory.length > MAX_HISTORY) {
-          return updatedHistory.slice(updatedHistory.length - MAX_HISTORY);
-        }
-        return updatedHistory;
+      setDri(prevDri => {
+        const newDri = Math.max(0, prevDri - 5);
+        setHistory(prevHistory => {
+            const updatedHistory = [...prevHistory, { time: Date.now(), dri: newDri }];
+            if (updatedHistory.length > MAX_HISTORY) {
+                return updatedHistory.slice(updatedHistory.length - MAX_HISTORY);
+            }
+            return updatedHistory;
+        });
+        return newDri;
       });
       return;
     }
 
-    // Simulate drowsiness
+    // Simulate drowsiness state change
     if (!simState.isDrowsy && Math.random() < simState.drowsinessChance) {
       simState.isDrowsy = true;
     } else if (simState.isDrowsy && Math.random() < simState.wakeUpChance) {
@@ -97,9 +100,11 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     setDri(prevDri => {
       let newDri;
       if (simState.isDrowsy) {
-        newDri = 75 + Math.random() * 20;
+        // DRI increases when drowsy
+        newDri = prevDri + (5 + Math.random() * 5);
       } else {
-        newDri = 5 + Math.random() * 20;
+        // DRI decreases when not drowsy
+        newDri = prevDri - (3 + Math.random() * 3);
       }
       
       newDri = Math.max(0, Math.min(100, newDri));
@@ -126,10 +131,10 @@ export function useDriverMonitoring(isMonitoring: boolean) {
     if (intervalIdRef.current) return;
     simState.isDrowsy = false;
     simState.isHumanPresent = true;
+    setDri(0);
     setHistory([{ time: Date.now(), dri: 0 }]);
     setAlerts([]);
     alertContextMap.current.clear();
-    setDri(0);
     setIsHumanPresent(true);
     lastAlertTimestamp.current = 0;
     intervalIdRef.current = setInterval(runSimulation, SIMULATION_INTERVAL);
