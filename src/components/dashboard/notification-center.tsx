@@ -93,7 +93,7 @@ export function NotificationCenter({ alerts, getAlertContext }: NotificationCent
               <div className="grid gap-4 py-4">
                 <div className="space-y-4">
                   <h4 className="font-semibold">DRI History at Time of Alert</h4>
-                  <DriHistoryChart history={selectedAlert.context.history} />
+                  <DriHistoryChart history={selectedAlert.context.history} container="div" />
                 </div>
                 <div className="space-y-4">
                     <h4 className="font-semibold">Safety Tip Provided</h4>
