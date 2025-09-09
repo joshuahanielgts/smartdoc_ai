@@ -6,6 +6,7 @@ import { generateDailySessionSummary, type GenerateDailySessionSummaryInput } fr
 import { generateSpeech } from '@/ai/flows/generate-speech';
 import { predictHighRiskZones, type PredictHighRiskZonesOutput } from '@/ai/flows/predict-high-risk-zones';
 import { triggerSOSAlert } from '@/ai/flows/trigger-sos-alert';
+import { getAccidentProneZones as getAccidentProneZonesFlow, type GetAccidentProneZonesOutput } from '@/ai/flows/get-accident-prone-zones';
 
 export async function getVoiceWarning(dri: number) {
   try {
@@ -65,5 +66,15 @@ export async function triggerSOS(driverId: string, lastKnownLocation: string) {
   } catch (error) {
     console.error('Error triggering SOS:', error);
     throw new Error('Could not trigger SOS alert.');
+  }
+}
+
+export async function getAccidentProneZones(latitude: number, longitude: number): Promise<GetAccidentProneZonesOutput> {
+  try {
+    const result = await getAccidentProneZonesFlow({ latitude, longitude });
+    return result;
+  } catch (error) {
+    console.error('Error getting accident prone zones:', error);
+    return { zones: [] };
   }
 }

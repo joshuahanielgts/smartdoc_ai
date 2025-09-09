@@ -22,3 +22,9 @@ export type EmergencyService = {
   phone: string;
   mapsUrl: string;
 };
+
+export type AccidentProneZone = {
+    name: string;
+    description: string;
+    riskLevel: 'High' | 'Medium' | 'Low';
+};

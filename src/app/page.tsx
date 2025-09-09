@@ -10,6 +10,7 @@ import { DriHistoryChart } from '@/components/dashboard/dri-history-chart';
 import { SafetyTips } from '@/components/dashboard/safety-tips';
 import { SessionSummary } from '@/components/dashboard/session-summary';
 import { RiskZoneForecast } from '@/components/dashboard/risk-zone-forecast';
+import { AccidentProneZones } from '@/components/dashboard/accident-prone-zones';
 import { Card } from '@/components/ui/card';
 
 declare global {
@@ -69,7 +70,10 @@ export default function DashboardPage() {
                 <AlertLog alerts={alerts} />
                 <SafetyTips history={history} alerts={alerts} />
               </div>
-              <RiskZoneForecast />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <RiskZoneForecast />
+                <AccidentProneZones />
+              </div>
             </div>
           </div>
         )}
